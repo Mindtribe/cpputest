@@ -78,3 +78,6 @@ missing
 test-driver
 platforms/iar/settings
 cpputest_*.xml
+
+# mtbuild output
+/build/CppUTest/
