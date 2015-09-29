@@ -77,3 +77,6 @@ m4/lt~obsolete.m4
 missing
 test-driver
 platforms/iar/settings
+
+# mtbuild output
+/build/CppUTest/
