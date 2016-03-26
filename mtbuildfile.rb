@@ -11,8 +11,8 @@ static_library_project :CppUTest, File.dirname(__FILE__) do |lib|
     sources: ['src/CppUTest/*.cpp', 'src/Platforms/Gcc/*.cpp'],
     toolchain: toolchain(:gcc,
       cppflags: '-DNDEBUG',
-      cflags: '-include CppUTest/MemoryLeakDetectorMallocMacros.h -g -Weverything -Wall -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Wstrict-prototypes',
-      cxxflags: '-include CppUTest/MemoryLeakDetectorNewMacros.h -include CppUTest/MemoryLeakDetectorMallocMacros.h -g -Weverything -Wall -Wno-old-style-cast -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Woverloaded-virtual -Wno-global-constructors -Wno-exit-time-destructors -Wno-weak-vtables -O2 -g'
+      cflags: '-include CppUTest/MemoryLeakDetectorMallocMacros.h -g -Wall -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Wstrict-prototypes',
+      cxxflags: '-include CppUTest/MemoryLeakDetectorNewMacros.h -include CppUTest/MemoryLeakDetectorMallocMacros.h -g -Wall -Wno-old-style-cast -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Woverloaded-virtual -Wno-global-constructors -Wno-exit-time-destructors -Wno-weak-vtables -O2 -g'
     ),
     tests: [
       'CppUTestTests:Test'
@@ -29,8 +29,8 @@ static_library_project :CppUTestExt, File.dirname(__FILE__) do |lib|
     sources: ['src/CppUTestExt/*.cpp'],
     toolchain: toolchain(:gcc,
       cppflags: '-DNDEBUG',
-      cflags: '-include CppUTest/MemoryLeakDetectorMallocMacros.h -g -Weverything -Wall -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Wstrict-prototypes',
-      cxxflags: '-include CppUTest/MemoryLeakDetectorNewMacros.h -include CppUTest/MemoryLeakDetectorMallocMacros.h -g -Weverything -Wall -Wno-old-style-cast -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Woverloaded-virtual -Wno-global-constructors -Wno-exit-time-destructors -Wno-weak-vtables -O2 -g'
+      cflags: '-include CppUTest/MemoryLeakDetectorMallocMacros.h -g -Wall -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Wstrict-prototypes',
+      cxxflags: '-include CppUTest/MemoryLeakDetectorNewMacros.h -include CppUTest/MemoryLeakDetectorMallocMacros.h -g -Wall -Wno-old-style-cast -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Woverloaded-virtual -Wno-global-constructors -Wno-exit-time-destructors -Wno-weak-vtables -O2 -g'
     ),
     tests: [
       'CppUTestExtTests:Test'
@@ -74,8 +74,8 @@ test_application_project :CppUTestTests, File.dirname(__FILE__) do |app|
       ],
     toolchain: toolchain(:gcc,
       cppflags: '-DNDEBUG',
-      cflags: '-include CppUTest/MemoryLeakDetectorMallocMacros.h -Weverything -Wall -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Wstrict-prototypes',
-      cxxflags: '-include CppUTest/MemoryLeakDetectorNewMacros.h -include CppUTest/MemoryLeakDetectorMallocMacros.h -Weverything -Wall -Wno-old-style-cast -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Woverloaded-virtual -Wno-global-constructors -Wno-exit-time-destructors -Wno-weak-vtables -O2 -g',
+      cflags: '-include CppUTest/MemoryLeakDetectorMallocMacros.h -Wall -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Wstrict-prototypes',
+      cxxflags: '-include CppUTest/MemoryLeakDetectorNewMacros.h -include CppUTest/MemoryLeakDetectorMallocMacros.h -Wall -Wno-old-style-cast -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Woverloaded-virtual -Wno-global-constructors -Wno-exit-time-destructors -Wno-weak-vtables -O2 -g',
       ldflags: '-lstdc++'
     ),
     dependencies: [
@@ -115,8 +115,8 @@ test_application_project :CppUTestExtTests, File.dirname(__FILE__) do |app|
       ],
     toolchain: toolchain(:gcc,
       cppflags: '-DNDEBUG',
-      cflags: '-include CppUTest/MemoryLeakDetectorMallocMacros.h -Weverything -Wall -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Wstrict-prototypes',
-      cxxflags: '-include CppUTest/MemoryLeakDetectorNewMacros.h -include CppUTest/MemoryLeakDetectorMallocMacros.h -Weverything -Wall -Wno-old-style-cast -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Woverloaded-virtual -Wno-global-constructors -Wno-exit-time-destructors -Wno-weak-vtables -O2 -g',
+      cflags: '-include CppUTest/MemoryLeakDetectorMallocMacros.h -Wall -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Wstrict-prototypes',
+      cxxflags: '-include CppUTest/MemoryLeakDetectorNewMacros.h -include CppUTest/MemoryLeakDetectorMallocMacros.h -Wall -Wno-old-style-cast -Wextra -Wshadow -Wswitch-default -Wswitch-enum -Wconversion -Wsign-conversion -Wno-padded -Wno-disabled-macro-expansion -Woverloaded-virtual -Wno-global-constructors -Wno-exit-time-destructors -Wno-weak-vtables -O2 -g',
       ldflags: '-lstdc++',
       include_paths: [
         'include/CppUTestExt/CppUTestGMock',
