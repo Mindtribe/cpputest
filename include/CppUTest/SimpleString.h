@@ -59,9 +59,11 @@ public:
     SimpleString& operator+=(const SimpleString&);
     SimpleString& operator+=(const char*);
 
-    char at(int pos) const;
-    int find(char ch) const;
-    int findFrom(size_t starting_position, char ch) const;
+    static const size_t npos = (size_t) -1;
+
+    char at(size_t pos) const;
+    size_t find(char ch) const;
+    size_t findFrom(size_t starting_position, char ch) const;
     bool contains(const SimpleString& other) const;
     bool containsNoCase(const SimpleString& other) const;
     bool startsWith(const SimpleString& other) const;
@@ -76,6 +78,7 @@ public:
     void replace(const char* to, const char* with);
 
     SimpleString lowerCase() const;
+    SimpleString subString(size_t beginPos) const;
     SimpleString subString(size_t beginPos, size_t amount) const;
     SimpleString subStringFromTill(char startChar, char lastExcludedChar) const;
     void copyToBuffer(char* buffer, size_t bufferSize) const;
@@ -143,6 +146,9 @@ SimpleString StringFrom(long value);
 SimpleString StringFrom(unsigned long value);
 SimpleString StringFrom(cpputest_longlong value);
 SimpleString StringFrom(cpputest_ulonglong value);
+SimpleString HexStringFrom(unsigned int value);
+SimpleString HexStringFrom(int value);
+SimpleString HexStringFrom(signed char value);
 SimpleString HexStringFrom(long value);
 SimpleString HexStringFrom(unsigned long value);
 SimpleString HexStringFrom(cpputest_longlong value);
@@ -159,6 +165,16 @@ SimpleString StringFromBinaryWithSize(const unsigned char* value, size_t size);
 SimpleString StringFromBinaryWithSizeOrNull(const unsigned char* value, size_t size);
 SimpleString StringFromMaskedBits(unsigned long value, unsigned long mask, size_t byteCount);
 SimpleString StringFromOrdinalNumber(unsigned int number);
+SimpleString BracketsFormattedHexStringFrom(int value);
+SimpleString BracketsFormattedHexStringFrom(unsigned int value);
+SimpleString BracketsFormattedHexStringFrom(long value);
+SimpleString BracketsFormattedHexStringFrom(unsigned long value);
+SimpleString BracketsFormattedHexStringFrom(cpputest_longlong value);
+SimpleString BracketsFormattedHexStringFrom(cpputest_ulonglong value);
+SimpleString BracketsFormattedHexStringFrom(signed char value);
+SimpleString BracketsFormattedHexString(SimpleString hexString);
+
+
 
 #if CPPUTEST_USE_STD_CPP_LIB
 

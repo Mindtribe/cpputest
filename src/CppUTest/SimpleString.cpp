@@ -369,33 +369,38 @@ SimpleString SimpleString::subString(size_t beginPos, size_t amount) const
     return newString;
 }
 
-char SimpleString::at(int pos) const
+SimpleString SimpleString::subString(size_t beginPos) const
+{
+    return subString(beginPos, npos);
+}
+
+char SimpleString::at(size_t pos) const
 {
     return buffer_[pos];
 }
 
-int SimpleString::find(char ch) const
+size_t SimpleString::find(char ch) const
 {
     return findFrom(0, ch);
 }
 
-int SimpleString::findFrom(size_t starting_position, char ch) const
+size_t SimpleString::findFrom(size_t starting_position, char ch) const
 {
     size_t length = size();
     for (size_t i = starting_position; i < length; i++)
-        if (buffer_[i] == ch) return (int) i;
-    return -1;
+        if (buffer_[i] == ch) return i;
+    return npos;
 }
 
 SimpleString SimpleString::subStringFromTill(char startChar, char lastExcludedChar) const
 {
-    int beginPos = find(startChar);
-    if (beginPos < 0) return "";
+    size_t beginPos = find(startChar);
+    if (beginPos == npos) return "";
 
-    int endPos = findFrom((size_t)beginPos, lastExcludedChar);
-    if (endPos == -1) return subString((size_t)beginPos, size());
+    size_t endPos = findFrom(beginPos, lastExcludedChar);
+    if (endPos == npos) return subString(beginPos);
 
-    return subString((size_t)beginPos, (size_t) (endPos - beginPos));
+    return subString(beginPos, endPos - beginPos);
 }
 
 char* SimpleString::copyToNewBuffer(const char* bufferToCopy, size_t bufferSize)
@@ -473,10 +478,62 @@ SimpleString HexStringFrom(long value)
     return StringFromFormat("%lx", value);
 }
 
+SimpleString HexStringFrom(int value)
+{
+    return StringFromFormat("%x", value);
+}
+
+SimpleString HexStringFrom(signed char value)
+{
+    SimpleString result = StringFromFormat("%x", value);
+    if(value < 0) {
+        size_t size = result.size();
+        result = result.subString(size-(CPPUTEST_CHAR_BIT/4));
+    }
+    return result;
+}
+
 SimpleString HexStringFrom(unsigned long value)
 {
     return StringFromFormat("%lx", value);
 }
+
+SimpleString HexStringFrom(unsigned int value)
+{
+    return StringFromFormat("%x", value);
+}
+
+SimpleString BracketsFormattedHexStringFrom(int value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
+}
+
+SimpleString BracketsFormattedHexStringFrom(unsigned int value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
+}
+
+SimpleString BracketsFormattedHexStringFrom(long value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
+}
+
+
+SimpleString BracketsFormattedHexStringFrom(unsigned long value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
+}
+
+SimpleString BracketsFormattedHexStringFrom(signed char value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
+}
+
+SimpleString BracketsFormattedHexString(SimpleString hexString)
+{
+    return SimpleString("(0x") + hexString + ")" ;
+}
+
 
 #ifdef CPPUTEST_USE_LONG_LONG
 
@@ -487,7 +544,7 @@ SimpleString StringFrom(cpputest_longlong value)
 
 SimpleString StringFrom(cpputest_ulonglong value)
 {
-    return StringFromFormat("%llu (0x%llx)", value, value);
+    return StringFromFormat("%llu", value);
 }
 
 SimpleString HexStringFrom(cpputest_longlong value)
@@ -508,6 +565,17 @@ SimpleString HexStringFrom(const void* value)
 SimpleString HexStringFrom(void (*value)())
 {
     return HexStringFrom((cpputest_ulonglong) value);
+}
+
+SimpleString BracketsFormattedHexStringFrom(cpputest_longlong value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
+}
+
+
+SimpleString BracketsFormattedHexStringFrom(cpputest_ulonglong value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
 }
 
 #else   /* CPPUTEST_USE_LONG_LONG */
@@ -564,6 +632,17 @@ SimpleString HexStringFrom(void (*value)())
     return StringFromFormat("%lx", convertFunctionPointerToLongValue(value));
 }
 
+SimpleString BracketsFormattedHexStringFrom(cpputest_longlong)
+{
+    return "";
+}
+
+
+SimpleString BracketsFormattedHexStringFrom(cpputest_ulonglong)
+{
+    return "";
+}
+
 #endif  /* CPPUTEST_USE_LONG_LONG */
 
 SimpleString StringFrom(double value, int precision)
@@ -599,7 +678,7 @@ SimpleString StringFromFormat(const char* format, ...)
 
 SimpleString StringFrom(unsigned int i)
 {
-    return StringFromFormat("%10u (0x%08x)", i, i);
+    return StringFromFormat("%u", i);
 }
 
 #if CPPUTEST_USE_STD_CPP_LIB
@@ -615,7 +694,7 @@ SimpleString StringFrom(const std::string& value)
 
 SimpleString StringFrom(unsigned long i)
 {
-    return StringFromFormat("%lu (0x%lx)", i, i);
+    return StringFromFormat("%lu", i);
 }
 
 //Kludge to get a va_copy in VC++ V6
