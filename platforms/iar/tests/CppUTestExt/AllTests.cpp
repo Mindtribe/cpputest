@@ -25,43 +25,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef D_MockFailureReporterForTest_h
-#define D_MockFailureReporterForTest_h
+#include "CppUTest/CommandLineTestRunner.h"
+#include "CppUTest/TestRegistry.h"
+#include "CppUTestExt/MemoryReporterPlugin.h"
+#include "CppUTestExt/MockSupportPlugin.h"
 
-#include "CppUTestExt/MockSupport.h"
-
-#define CHECK_EXPECTED_MOCK_FAILURE(expectedFailure) CHECK_EXPECTED_MOCK_FAILURE_LOCATION(expectedFailure, __FILE__, __LINE__)
-#define CHECK_NO_MOCK_FAILURE() CHECK_NO_MOCK_FAILURE_LOCATION(__FILE__, __LINE__)
-
-class MockFailureReporterForTest : public MockFailureReporter
-{
-public:
-    SimpleString mockFailureString;
-
-    virtual void failTest(const MockFailure& failure);
-    static MockFailureReporterForTest* getReporter();
-};
-
-class MockFailureReporterInstaller
-{
-  public:
-    MockFailureReporterInstaller();
-    ~MockFailureReporterInstaller();
-};
-
-UtestShell* mockFailureTest();
-SimpleString mockFailureString();
-void CLEAR_MOCK_FAILURE();
-void CHECK_EXPECTED_MOCK_FAILURE_LOCATION(const MockFailure& expectedFailure, const char* file, int line);
-void CHECK_NO_MOCK_FAILURE_LOCATION(const char* file, int line);
-
-class MockExpectedCallsListForTest : public MockExpectedCallsList
-{
-  public:
-    ~MockExpectedCallsListForTest();
-    MockCheckedExpectedCall* addFunction(const SimpleString& name);
-    MockCheckedExpectedCall* addFunctionOrdered(const SimpleString& name, unsigned int order);
-};
-
+#ifdef CPPUTEST_INCLUDE_GTEST_TESTS
+#include "CppUTestExt/GTestConvertor.h"
 #endif
+
+int main(int ac, const char** av)
+{
+    const char * av_override[] = {"exe", "-v"};
+#ifdef CPPUTEST_INCLUDE_GTEST_TESTS
+    GTestConvertor convertor;
+    convertor.addAllGTestToTestRegistry();
+#endif
+
+    MemoryReporterPlugin plugin;
+    MockSupportPlugin mockPlugin;
+    TestRegistry::getCurrentRegistry()->installPlugin(&plugin);
+    TestRegistry::getCurrentRegistry()->installPlugin(&mockPlugin);
+
+#ifndef GMOCK_RENAME_MAIN
+    int rv = CommandLineTestRunner::RunAllTests(2, av_override);
+#else
+    /* Don't have any memory leak detector when running the Google Test tests */
+
+    testing::GMOCK_FLAG(verbose) = testing::internal::kWarningVerbosity;
+
+    ConsoleTestOutput output;
+    CommandLineTestRunner runner(ac, av, &output, TestRegistry::getCurrentRegistry());
+    return runner.runAllTestsMain();
+#endif
+    
+    //Exiting from main causes IAR simulator to issue out-of-bounds memory access warnings.
+    volatile int wait = 1;
+    while (wait){}
+    return rv;
+}
 
