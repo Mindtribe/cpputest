@@ -170,6 +170,8 @@ void TestOutput::printTestsEnded(const TestResult& result)
         print("\033[m");
     }
     print("\n\n");
+
+    dotCount_ = 0;
 }
 
 void TestOutput::printTestRun(int number, int total)
@@ -267,7 +269,7 @@ StringBufferTestOutput::~StringBufferTestOutput()
 }
 
 CompositeTestOutput::CompositeTestOutput()
-  : outputOne_(NULL), outputTwo_(NULL)
+  : outputOne_(NULLPTR), outputTwo_(NULLPTR)
 {
 }
 

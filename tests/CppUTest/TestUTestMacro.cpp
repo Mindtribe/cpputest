@@ -31,6 +31,18 @@
 
 #define CHECK_TEST_FAILS_PROPER_WITH_TEXT(text) fixture.checkTestFailsWithProperTestLocation(text, __FILE__, __LINE__)
 
+// Mainly this is for Visual C++, but we'll define it for any system that has the same behavior
+// of a 32-bit long on a 64-bit system
+#if defined(CPPUTEST_64BIT) && defined(CPPUTEST_64BIT_32BIT_LONGS)
+// Forcing the value to be unsigned long long means that there's no sign-extension to perform
+#define to_void_pointer(x) ((void *)x##ULL)
+#define to_func_pointer(x) ((void (*)())x##ULL)
+#else
+// Probably not needed, but let's guarantee that the value is an unsigned long
+#define to_void_pointer(x) ((void *)x##UL)
+#define to_func_pointer(x) ((void (*)())x##UL)
+#endif
+
 TEST_GROUP(UnitTestMacros)
 {
     TestTestingFixture fixture;
@@ -394,6 +406,55 @@ TEST(UnitTestMacros, FailureWithCHECK_EQUAL)
     CHECK_TEST_FAILS_PROPER_WITH_TEXT("but was  <2>");
 }
 
+static void _failingTestMethodWithCHECK_COMPARE()
+{
+    double small = 0.5, big = 0.8;
+    CHECK_COMPARE(small, >=, big);
+    TestTestingFixture::lineExecutedAfterCheck(); // LCOV_EXCL_LINE
+} // LCOV_EXCL_LINE
+
+TEST(UnitTestMacros, FailureWithCHECK_COMPARE)
+{
+    fixture.runTestWithMethod(_failingTestMethodWithCHECK_COMPARE);
+    CHECK_TEST_FAILS_PROPER_WITH_TEXT("CHECK_COMPARE(0.5 >= 0.8)");
+}
+
+TEST(UnitTestMacros, CHECK_COMPAREBehavesAsProperMacro)
+{
+    if (false) CHECK_COMPARE(1, >, 2)
+    else CHECK_COMPARE(1, <, 2)
+}
+
+IGNORE_TEST(UnitTestMacros, CHECK_COMPAREWorksInAnIgnoredTest)
+{
+  CHECK_COMPARE(1, >, 2) // LCOV_EXCL_LINE
+} // LCOV_EXCL_LINE
+
+static void _failingTestMethodWithCHECK_COMPARE_TEXT()
+{
+    double small = 0.5, big = 0.8;
+    CHECK_COMPARE_TEXT(small, >=, big, "small bigger than big");
+    TestTestingFixture::lineExecutedAfterCheck(); // LCOV_EXCL_LINE
+} // LCOV_EXCL_LINE
+
+TEST(UnitTestMacros, FailureWithCHECK_COMPARE_TEXT)
+{
+    fixture.runTestWithMethod(_failingTestMethodWithCHECK_COMPARE_TEXT);
+    CHECK_TEST_FAILS_PROPER_WITH_TEXT("CHECK_COMPARE(0.5 >= 0.8)");
+    CHECK_TEST_FAILS_PROPER_WITH_TEXT("small bigger than big");
+}
+
+TEST(UnitTestMacros, CHECK_COMPARE_TEXTBehavesAsProperMacro)
+{
+  if (false) CHECK_COMPARE_TEXT(1, >, 2, "1 bigger than 2")
+  else CHECK_COMPARE_TEXT(1, <, 2, "1 smaller than 2")
+}
+
+IGNORE_TEST(UnitTestMacros, CHECK_COMPARE_TEXTWorksInAnIgnoredTest)
+{
+  CHECK_COMPARE_TEXT(1, >, 2, "1 smaller than 2") // LCOV_EXCL_LINE
+} // LCOV_EXCL_LINE
+
 static int countInCountingMethod;
 static int _countingMethod()
 {
@@ -672,8 +733,8 @@ TEST(UnitTestMacros, FailureWithPOINTERS_EQUAL)
 
 TEST(UnitTestMacros, POINTERS_EQUALBehavesAsProperMacro)
 {
-    if (false) POINTERS_EQUAL(0, (void*) 0xbeefbeef)
-    else POINTERS_EQUAL((void*)0xdeadbeef, (void*)0xdeadbeef)
+    if (false) POINTERS_EQUAL(NULLPTR, to_void_pointer(0xbeefbeef))
+    else POINTERS_EQUAL(to_void_pointer(0xdeadbeef), to_void_pointer(0xdeadbeef))
 }
 
 IGNORE_TEST(UnitTestMacros, POINTERS_EQUALWorksInAnIgnoredTest)
@@ -697,8 +758,8 @@ TEST(UnitTestMacros, FailureWithPOINTERS_EQUAL_TEXT)
 
 TEST(UnitTestMacros, POINTERS_EQUAL_TEXTBehavesAsProperMacro)
 {
-    if (false) POINTERS_EQUAL_TEXT(0, (void*) 0xbeefbeef, "Failed because it failed")
-    else POINTERS_EQUAL_TEXT((void*)0xdeadbeef, (void*)0xdeadbeef, "Failed because it failed")
+    if (false) POINTERS_EQUAL_TEXT(NULLPTR, to_void_pointer(0xbeefbeef), "Failed because it failed")
+    else POINTERS_EQUAL_TEXT(to_void_pointer(0xdeadbeef), to_void_pointer(0xdeadbeef), "Failed because it failed")
 }
 
 IGNORE_TEST(UnitTestMacros, POINTERS_EQUAL_TEXTWorksInAnIgnoredTest)
@@ -722,8 +783,8 @@ TEST(UnitTestMacros, FailureWithFUNCTIONPOINTERS_EQUAL)
 
 TEST(UnitTestMacros, FUNCTIONPOINTERS_EQUALBehavesAsProperMacro)
 {
-    if (false) FUNCTIONPOINTERS_EQUAL(0, (void (*)())0xbeefbeef)
-    else FUNCTIONPOINTERS_EQUAL((void (*)())0xdeadbeef, (void (*)())0xdeadbeef)
+    if (false) FUNCTIONPOINTERS_EQUAL(NULLPTR, to_func_pointer(0xbeefbeef))
+    else FUNCTIONPOINTERS_EQUAL(to_func_pointer(0xdeadbeef), to_func_pointer(0xdeadbeef))
 }
 
 IGNORE_TEST(UnitTestMacros, FUNCTIONPOINTERS_EQUALWorksInAnIgnoredTest)
@@ -747,8 +808,8 @@ TEST(UnitTestMacros, FailureWithFUNCTIONPOINTERS_EQUAL_TEXT)
 
 TEST(UnitTestMacros, FUNCTIONPOINTERS_EQUAL_TEXTBehavesAsProperMacro)
 {
-    if (false) FUNCTIONPOINTERS_EQUAL_TEXT(0, (void (*)())0xbeefbeef, "Failed because it failed")
-    else FUNCTIONPOINTERS_EQUAL_TEXT((void (*)())0xdeadbeef, (void (*)())0xdeadbeef, "Failed because it failed")
+    if (false) FUNCTIONPOINTERS_EQUAL_TEXT(NULLPTR, to_func_pointer(0xbeefbeef), "Failed because it failed")
+    else FUNCTIONPOINTERS_EQUAL_TEXT(to_func_pointer(0xdeadbeef), to_func_pointer(0xdeadbeef), "Failed because it failed")
 }
 
 IGNORE_TEST(UnitTestMacros, FUNCTIONPOINTERS_EQUAL_TEXTWorksInAnIgnoredTest)
@@ -870,8 +931,8 @@ static int functionThatReturnsAValue()
     STRCMP_EQUAL_TEXT("THIS", "THIS", "Shouldn't fail");
     DOUBLES_EQUAL(1.0, 1.0, .01);
     DOUBLES_EQUAL_TEXT(1.0, 1.0, .01, "Shouldn't fail");
-    POINTERS_EQUAL(0, 0);
-    POINTERS_EQUAL_TEXT(0, 0, "Shouldn't fail");
+    POINTERS_EQUAL(NULLPTR, NULLPTR);
+    POINTERS_EQUAL_TEXT(NULLPTR, NULLPTR, "Shouldn't fail");
     MEMCMP_EQUAL("THIS", "THIS", 5);
     MEMCMP_EQUAL_TEXT("THIS", "THIS", 5, "Shouldn't fail");
     BITS_EQUAL(0x01, (unsigned char )0x01, 0xFF);
@@ -918,7 +979,7 @@ static void _MEMCMP_EQUALFailingTestMethodWithNullExpected()
 {
     unsigned char actualData[] = { 0x00, 0x01, 0x02, 0x03 };
 
-    MEMCMP_EQUAL(NULL, actualData, sizeof(actualData));
+    MEMCMP_EQUAL(NULLPTR, actualData, sizeof(actualData));
     TestTestingFixture::lineExecutedAfterCheck(); // LCOV_EXCL_LINE
 } // LCOV_EXCL_LINE
 
@@ -933,7 +994,7 @@ static void _MEMCMP_EQUALFailingTestMethodWithNullActual()
 {
     unsigned char expectedData[] = { 0x00, 0x01, 0x02, 0x03 };
 
-    MEMCMP_EQUAL(expectedData, NULL, sizeof(expectedData));
+    MEMCMP_EQUAL(expectedData, NULLPTR, sizeof(expectedData));
     TestTestingFixture::lineExecutedAfterCheck(); // LCOV_EXCL_LINE
 } // LCOV_EXCL_LINE
 
@@ -946,8 +1007,8 @@ TEST(UnitTestMacros, MEMCMP_EQUALFailureWithNullActual)
 
 TEST(UnitTestMacros, MEMCMP_EQUALNullExpectedNullActual)
 {
-    MEMCMP_EQUAL(NULL, NULL, 0);
-    MEMCMP_EQUAL(NULL, NULL, 1024);
+    MEMCMP_EQUAL(NULLPTR, NULLPTR, 0);
+    MEMCMP_EQUAL(NULLPTR, NULLPTR, 1024);
 }
 
 static void _failingTestMethodWithMEMCMP_EQUAL_TEXT()

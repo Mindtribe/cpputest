@@ -4,7 +4,8 @@ set(CppUTest_version_major 3)
 set(CppUTest_version_minor 8)
 
 # 2.6.3 is needed for ctest support
-cmake_minimum_required(VERSION 2.8.7)
+# 3.1 is needed for target_sources
+cmake_minimum_required(VERSION 3.1)
 
 # Check for functions before setting a lot of stuff
 include(CheckFunctionExists)
@@ -19,13 +20,20 @@ if(HAVE_STRDUP)
   add_definitions(-DCPPUTEST_HAVE_STRDUP=1)
 endif(HAVE_STRDUP)
 
-# Apply workaround for MinGW timespec redefinition (pthread.h / time.h)
 if (MINGW)
+    # Apply workaround for MinGW timespec redefinition (pthread.h / time.h)
     include(CheckStructHasMember)
     check_struct_has_member("struct timespec" tv_sec time.h HAVE_STRUCT_TIMESPEC)
     if (HAVE_STRUCT_TIMESPEC)
         add_definitions(-D_TIMESPEC_DEFINED=1)
     endif()
+
+    # Apply workaround for static/shared libraries on MinGW C/C++ compiler
+    # Issue occurs with CMake >= 3.9.0, it doesn't filter out gcc,gcc_s,gcc_eh from
+    # the implicit library list anymore, so the C++ linker is getting passed the static
+    # gcc_eh library since that's what the C linker uses by default. Only solution appears
+    # to be to force static linkage.
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 endif()
 
 option(STD_C "Use the standard C library" ON)
@@ -41,6 +49,8 @@ option(WERROR "Compile with warnings as errors" OFF)
 
 option(TESTS "Compile and make tests for the code?" ON)
 option(TESTS_DETAILED "Run each test separately instead of grouped?" OFF)
+
+option(VERBOSE_CONFIG "Print configuration to stdout during generation" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "What kind of build this is" FORCE)
@@ -59,6 +69,7 @@ include(CTest)
 #include("${CppUTestRootDirectory}/cmake/Modules/CheckFunctionExists.cmake")
 include("${CppUTestRootDirectory}/cmake/Modules/CppUTestBuildTimeDiscoverTests.cmake")
 include("${CppUTestRootDirectory}/cmake/Modules/CppUTestNormalizeTestOutputLocation.cmake")
+include(GNUInstallDirs)
 
 configure_file (
     "${PROJECT_SOURCE_DIR}/config.h.cmake"
@@ -81,8 +92,8 @@ if (TESTS)
     endif (EXTENSIONS)
 endif (TESTS)
 
-set (INCLUDE_INSTALL_DIR "include")
-set (LIB_INSTALL_DIR "lib")
+set (INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}")
+set (LIB_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
 set (INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 # Pkg-config file.
@@ -125,8 +136,13 @@ if(PkgHelpers_AVAILABLE)
     ${CMAKE_CURRENT_BINARY_DIR}/CppUTestConfig.cmake
     INSTALL_DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
     PATH_VARS INCLUDE_DIR CMAKE_CURRENT_BINARY_DIR)
-  export(TARGETS CppUTest CppUTestExt
-    FILE "${CMAKE_CURRENT_BINARY_DIR}/CppUTestTargets.cmake")
+  if (EXTENSIONS)
+    export(TARGETS CppUTest CppUTestExt
+      FILE "${CMAKE_CURRENT_BINARY_DIR}/CppUTestTargets.cmake")
+  else()
+    export(TARGETS CppUTest
+      FILE "${CMAKE_CURRENT_BINARY_DIR}/CppUTestTargets.cmake")
+  endif()
   write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/CppUTestConfigVersion.cmake
     VERSION ${CppUTest_version_major}.${CppUTest_version_minor}
@@ -138,7 +154,8 @@ else()
     " or write generators for CppUTestConfig.cmake by yourself.")
 endif()
 
-message("
+if(VERBOSE_CONFIG)
+  message("
 -------------------------------------------------------
 CppUTest Version ${CppUTest_version_major}.${CppUTest_version_minor}
 
@@ -167,3 +184,4 @@ Features configured in CppUTest:
 
 -------------------------------------------------------
 ")
+endif()
